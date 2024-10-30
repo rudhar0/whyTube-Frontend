@@ -1,8 +1,11 @@
 
+import { useState } from 'react'
 import './App.css'
 import Login from './pages/Login'
 
 function App() {
+  const [user,setUser] = useState()
+  const [cookies, setCookie, removeCookie] = useCookies(['cookie-name']);
   
 
   return (

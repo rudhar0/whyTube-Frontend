@@ -1,6 +1,7 @@
-import {  useState } from "react";
+import { useState } from "react";
 import FormWithOneInput from "../components/FormWithOneInput";
 import LogoWthText from "../components/LogoWthText";
+import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 
 function LoginStage(data) {
@@ -19,9 +20,7 @@ function LoginStage(data) {
           labelVal={"Email or usernsme*"}
           buttonText="Next"
           onClick={() => {
-            if (data.insertInputValue()) {
-              setCurrentStage(1);
-            }
+            data.insertInputValue(setCurrentStage);
           }}
         />
       );
@@ -37,10 +36,8 @@ function LoginStage(data) {
           buttonText="Sign In"
           labelVal={"Password*"}
           PlaceHolder="Enter Your Password"
-          onClick={(e) => {
-            if (data.insertInputValue(e)) {
-              setCurrentStage(1);
-            }
+          onClick={() => {
+            data.callingForm();
           }}
         />
       );
@@ -57,11 +54,32 @@ function Login() {
   const [inputValue, setInputValue] = useState("");
   const [inputPassword, setInputPassword] = useState("");
 
-  function AddingInputValue() {
+  function callingForm() {
+    if (inputPassword == "") {
+      setError(true);
+      setErrorMsg("password  is required");
+      return;
+    }
+    const emailVerify = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    axios
+      .post("/api/v1/users/login", {
+        password: inputPassword,
+        email: emailVerify.test(inputValue) ? inputValue : undefined,
+        username: !emailVerify.test(inputValue) ? inputValue : undefined,
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  function AddingInputValue(setCurrentStage) {
     if (inputValue.trim() === "") {
       setError(true);
       setErrorMsg("Input is required");
-      return false;
+      return;
     }
 
     const emailVerify = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,15 +92,18 @@ function Login() {
       .then(function (res) {
         const response = res.data;
         console.log(response);
+        //.replace(/^Error:\s*/, '')
         if (emailVerify.test(inputValue)) {
           const email = inputValue;
           setMainText(`Email: ${email}`);
         } else {
           const username = inputValue;
-          setMainText(`${ username.username}Enter Password`);
+          setMainText(`Enter Password`);
         }
+        setCurrentStage(1);
       })
       .catch(function (error) {
+        console.log(error);
         if (error.response) {
           console.log(error.response.data.match(/<pre>(.*?)<br>/s));
 
@@ -93,10 +114,7 @@ function Login() {
           setErrorMsg(error.message);
         }
         setError(true);
-        return false;
       });
-
-    return true;
   }
 
   return (
@@ -109,11 +127,12 @@ function Login() {
           setMainText={setMainText}
           setValue={setInputValue}
           setError={setError}
+          callingForm={callingForm}
           password={inputPassword}
           setPassword={setInputPassword}
           EmptyError={error}
-          insertInputValue={() => {
-            return AddingInputValue();
+          insertInputValue={(setCurrentStage) => {
+            return AddingInputValue(setCurrentStage);
           }}
         ></LoginStage>
       </div>
