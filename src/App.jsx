@@ -1,18 +1,20 @@
-
-import { useState } from 'react'
-import './App.css'
-import Login from './pages/Login'
+import { useState } from "react";
+import "./App.css";
+import Login from "./pages/Login";
+import { CookiesProvider, useCookies } from "react-cookie";
 
 function App() {
-  const [user,setUser] = useState()
-  const [cookies, setCookie, removeCookie] = useCookies(['cookie-name']);
   
+  const [cookie, setCookie] = useCookies(['user','acessToken','refreshToken'])
 
   return (
-    <div className=' bg-black h-[100vh]  w-[100wh] flex justify-center items-start'>
-    <Login/>
-    </div>
-  )
+    <CookiesProvider>
+      
+      <div className=" bg-black h-[100vh]  w-[100wh] flex justify-center items-start">
+        <Login />
+      </div>
+    </CookiesProvider>
+  );
 }
 
-export default App
+export default App;
